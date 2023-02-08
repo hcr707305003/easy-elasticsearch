@@ -251,7 +251,9 @@ class ElasticsearchHandler
         //order condition jointing
         $this->setParam($this->getOrder(), 'body.sort');
         //set highlight
-        $this->setParam($this->getHighLight(), 'body.highlight');
+        if($this->getHighLight()) {
+            $this->setParam($this->getHighLight(), 'body.highlight');
+        }
 //        var_export($this->getParam(['index', 'type', 'size', 'from', 'body']));
         try {
             return $this->client->search($this->getParam(['index', 'type', 'size', 'from', 'body']))->asArray();
