@@ -1,0 +1,22 @@
+{
+    "name": "shiroi/easy-elasticsearch",
+    "description": "elasticsearch便捷使用工具",
+    "require": {
+        "php": ">=7.4",
+        "elasticsearch/elasticsearch": "^8.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Shiroi\\EasyElasticsearch\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "私はあなたを",
+            "email": "707305003@qq.com"
+        }
+    ]
+}
