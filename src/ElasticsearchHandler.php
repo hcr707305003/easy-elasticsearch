@@ -155,10 +155,11 @@ class ElasticsearchHandler
         $this->setParam($this->getIndex(),'index',$this->param)
             ->setParam($this->getType(),'type',$this->param)
             ->setParam($id,'id',$this->param)
-            ->setParam($doc,'body',$this->param, true)
             ->setSaveData($doc);
+        $param = $this->getParam();
+        $this->setParam($doc,'body',$param);
         try {
-            return $this->client->index($this->getParam())->asBool()? $this->getSaveData(): false;
+            return $this->client->index($param)->asBool()? $this->getSaveData(): false;
         } catch (Exception $e) {
             return $e->getMessage();
         }
