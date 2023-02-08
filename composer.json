@@ -1,6 +1,7 @@
 {
     "name": "shiroi/easy-elasticsearch",
     "description": "elasticsearch便捷使用工具",
+    "license": "MIT",
     "require": {
         "php": ">=7.4",
         "elasticsearch/elasticsearch": "^8.6"
@@ -15,7 +16,7 @@
     },
     "authors": [
         {
-            "name": "私はあなたを",
+            "name": "hcr707305003",
             "email": "707305003@qq.com"
         }
     ]
