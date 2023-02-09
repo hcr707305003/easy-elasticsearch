@@ -156,7 +156,7 @@ class ElasticsearchHandler
             ->setParam($this->getType(),'type',$this->param)
             ->setParam($id,'id',$this->param)
             ->setSaveData($doc);
-        $param = $this->getParam();
+        $param = $this->getParam(['index', 'type', 'id']);
         $this->setParam($doc,'body',$param);
         try {
             return $this->client->index($param)->asBool()? $this->getSaveData(): false;
@@ -242,12 +242,11 @@ class ElasticsearchHandler
         $this->setParam($this->getIndex())
             ->setParam($this->getType(),'type')
             ->setParam($this->getLimit(),'size')
-            ->setParam(($this->getPage() - 1) * $this->getLimit(), 'from');
+            ->setParam(($this->getPage() - 1) * $this->getLimit(), 'from')
+            ->setParam([], 'body', $this->param, true);
         //where condition jointing
         if($this->getWhereData()) {
             $this->setParam($this->getWhereData(), 'body.query');
-        } else {
-            $this->setParam([],'match_all');
         }
         //order condition jointing
         $this->setParam($this->getOrder(), 'body.sort');
