@@ -4,6 +4,7 @@ namespace Shiroi\EasyElasticsearch;
 
 use Elastic\Elasticsearch\{Client, ClientBuilder};
 use Exception;
+use Shiroi\EasyElasticsearch\bean\QueryProperty;
 use stdClass;
 
 class ElasticsearchHandler
@@ -154,7 +155,7 @@ class ElasticsearchHandler
     {
         $this->setParam($this->getIndex(),'index',$this->param)
             ->setParam($this->getType(),'type',$this->param)
-            ->setParam($id,'id',$this->param)
+            ->setParam($id,'id',$this->param, true)
             ->setSaveData($doc);
         $param = $this->getParam(['index', 'type', 'id']);
         $this->setParam($doc,'body',$param);
@@ -254,7 +255,7 @@ class ElasticsearchHandler
         if($this->getHighLight()) {
             $this->setParam($this->getHighLight(), 'body.highlight');
         }
-//        var_export($this->getParam(['index', 'type', 'size', 'from', 'body']));
+//        var_export($this->getParam(['index', 'type', 'size', 'from', 'body']));die();
         try {
             return $this->client->search($this->getParam(['index', 'type', 'size', 'from', 'body']))->asArray();
         } catch (Exception $e) {
@@ -262,29 +263,22 @@ class ElasticsearchHandler
         }
     }
 
-    public function where($field, $op = null, $condition = null): self {
+    public function where($field, $op = null, $condition = null, $func = null): self {
         $match = [];
         if(is_array($field)) {
             foreach ($field as $key => $val) {
                 if(is_string($val)) $this->buildWhere($key,$val);
                 if(is_array($val)) {
                     foreach ($val as $v) if(!is_array($v)) {
-                        $val = [$val];
-                        break;
+                        $val = [$val];break;
                     }
                     foreach ($val as $v) {
-                        if(count($v) == 2) {
-                            $this->buildWhere($key, $v[1], $v[0]);
-                        } else {
-                            $this->buildWhere($key, $v[0]);
-                        }
+                        call_user_func_array([self::class, 'buildWhere'], array_merge([$key], $v));
                     }
                 }
             }
         } else {
-            $param = func_get_args();
-            if(count($param) == 2) $this->buildWhere($param[0], $param[1]);
-            if(count($param) == 3) $this->buildWhere($param[0], $param[2], $param[1]);
+            call_user_func_array([self::class, 'buildWhere'], func_get_args());
         }
         $this->setParam($this->andWhere,'bool.must', $match)
             ->setParam($this->notWhere,'bool.must_not', $match)
@@ -345,36 +339,51 @@ class ElasticsearchHandler
     /**
      * where query build
      * @param $field
-     * @param $value
+     * @param $op
      * @param $condition
+     * @param $func
      * @return void
      */
-    private function buildWhere($field, $value, $condition = null) {
-        switch ($condition) {
+    private function buildWhere($field, $op, $condition = null, $func = null) {
+        $param = func_get_args();
+        $obj = end($param);
+        $fields = [];
+        if(is_object($obj)) {
+            //获取对象
+            $obj($queryProperty = new QueryProperty());
+            //获取对象属性
+            $fields = array_filter(get_object_vars($queryProperty));
+            //忽略对象参数
+            array_pop($param);
+        }
+        if(count($param) == 2) $condition = $op;
+        switch ($op) {
             case 'between':
-                if(is_string($value)) $value = explode(',',$value);
-                if(count($value) == 2) {
-                    $this->andWhere[]['range'] = [$field => ['gte' => $value[0], 'lte' => $value[1]]];
+                if(is_string($condition)) $condition = explode(',',$condition);
+                if(count($condition) == 2) {
+                    $this->andWhere[]['range'] = [$field => array_merge(
+                        ['gte' => $condition[0], 'lte' => $condition[1]], $fields
+                    )];
                 }
                 break;
             case '=':
-                $this->andWhere[]['term'] = [$field => $value];
+                $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
                 break;
             case 'gt':
             case '>':
-                $this->andWhere[]['range'] = [$field => ['gt' => $value]];
+                $this->andWhere[]['range'] = [$field => array_merge(['gt' => $condition], $fields)];
                 break;
             case 'lt':
             case '<':
-                $this->andWhere[]['range'] = [$field => ['lt' => $value]];
+                $this->andWhere[]['range'] = [$field => array_merge(['lt' => $condition], $fields)];
                 break;
             case 'gte':
             case '>=':
-                $this->andWhere[]['range'] = [$field => ['gte' => $value]];
+                $this->andWhere[]['range'] = [$field => array_merge(['gte' => $condition], $fields)];
                 break;
             case 'lte':
             case '<=':
-                $this->andWhere[]['range'] = [$field => ['lte' => $value]];
+                $this->andWhere[]['range'] = [$field => array_merge(['lte' => $condition], $fields)];
                 break;
             case 'not gt':
             case '! gt':
@@ -382,7 +391,7 @@ class ElasticsearchHandler
             case '! >':
             case '!>':
             case 'not >':
-                $this->notWhere[]['range'] = [$field => ['gt' => $value]];
+                $this->notWhere[]['range'] = [$field => array_merge(['gt' => $condition], $fields)];
                 break;
             case 'not lt':
             case '! lt':
@@ -390,7 +399,7 @@ class ElasticsearchHandler
             case '! <':
             case '!<':
             case 'not <':
-                $this->notWhere[]['range'] = [$field => ['lt' => $value]];
+                $this->notWhere[]['range'] = [$field => array_merge(['lt' => $condition], $fields)];
                 break;
             case 'not gte':
             case '! gte':
@@ -398,7 +407,7 @@ class ElasticsearchHandler
             case '! >=':
             case '!>=':
             case 'not >=':
-                $this->notWhere[]['range'] = [$field => ['gte' => $value]];
+                $this->notWhere[]['range'] = [$field => array_merge(['gte' => $condition], $fields)];
                 break;
             case 'not lte':
             case '! lte':
@@ -406,41 +415,43 @@ class ElasticsearchHandler
             case '! <=':
             case '!<=':
             case 'not <=':
-                $this->notWhere[]['range'] = [$field => ['lte' => $value]];
+                $this->notWhere[]['range'] = [$field => array_merge(['lte' => $condition], $fields)];
                 break;
             case 'in':
-                $this->andWhere[]['terms'] = [$field => is_array($value)?$value:explode(',',$value)];
+                $this->andWhere[]['terms'] = [$field => array_merge(
+                    ['value' => is_array($condition)? $condition: explode(',',$condition)], $fields
+                )];
                 break;
             case 'and':
             case 'like':
             case '&&':
-                $this->andWhere[]['match'] = [$field => $value];
+                $this->andWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
                 break;
             case '=!':
             case '!=':
             case 'not like':
             case 'not':
-                $this->notWhere[]['match'] = [$field => $value];
+                $this->notWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
                 break;
             case 'not in':
-                if(is_string($value)) $value = explode(',',$value);
-                foreach ($value as $v) {
-                    $this->notWhere[]['match'] = [$field => $v];
+                if(is_string($condition)) $condition = explode(',',$condition);
+                foreach ($condition as $v) {
+                    $this->notWhere[]['match'] = [$field => array_merge(['query' => $v], $fields)];
                 }
                 break;
             case 'not between':
-                if(is_string($value)) $value = explode(',',$value);
-                if(count($value) == 2) {
-                    $this->notWhere[]['range'] = ['id' => ['gte' => $value[0], 'lte' => $value[1]]];
+                if(is_string($condition)) $condition = explode(',',$condition);
+                if(count($condition) == 2) {
+                    $this->notWhere[]['range'] = ['id' => array_merge(['gte' => $condition[0], 'lte' => $condition[1]], $fields)];
                 }
                 break;
             case 'or':
             case '||':
             case 'or like':
-                $this->orWhere[]['match'] = [$field => $value];
+                $this->orWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
                 break;
             default:
-                $this->andWhere[]['term'] = [$field => $value];
+                $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
         }
     }
 
@@ -480,7 +491,7 @@ class ElasticsearchHandler
      * @param boolean|string|array $show
      * @return array
      */
-    private function getParam($show = true): array
+    public function getParam($show = true): array
     {
         $arr = [];
         if(is_bool($show)) {

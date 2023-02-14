@@ -64,7 +64,7 @@ class Test extends TestCase
      * 添加文档
      */
     public function testAddDoc() {
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 50; $i++) {
             var_dump($this->handler()->add_doc([
                 'id' => $i,
                 'username' => uniqid(),
@@ -114,14 +114,20 @@ class Test extends TestCase
             ->setPage(1)
             ->setLimit(10)
             //精确查询
-//            ->where('id',2)
+            ->where('id','between', '1,5', function($query) {
+                $query->boost = 3;
+            })
             //模糊查询
-//            ->where('content', 'like', 'update after')
+            ->where('content', 'like', 'test', function ($query) {
+                $query->boost = 2;
+            })
             //多条件查询
-//            ->where('id','between', [1,10])
-//            ->where([
-//                'password' => ['<=', 500000],
-//                'content' => ['or like', 'update'],
+            ->where('id','not between', [5,10])
+            ->where([
+                'password' => ['>=', 500000, function($obj) {
+                    $obj->boost = 4;
+                }],
+                'content' => ['or like', 'update'],
 //                'id' => [
 //                    ['in', '1,2,3,4,5,6'],
 //                    ['not in', [5,6]],
@@ -130,17 +136,8 @@ class Test extends TestCase
 //                    ['>', 1],
 //                    ['<', 8]
 //                ]
-//            ])
-
-            ->where([
-                'password' => [
-                    'or', '123456'
-                ],
-                'content' => [
-                    'like', '苹果手机'
-                ]
             ])
-//            ->where('content', 'like', 'update content after')
+
             ->order(['id' => 'desc'])
             ->setHighLight([
                 'password',
@@ -158,6 +155,7 @@ class Test extends TestCase
 
     /**
      * 搜索文档
+     * @throws Exception
      */
     public function testSearchDoc_3() {
         //地址
@@ -188,19 +186,19 @@ class Test extends TestCase
             'create_time' => 'int',
             'update_time' => 'int',
         ]);
-        var_dump($table);
+//        var_dump($table);
 
         //删除索引
 //        var_dump($es->delete_index());
 
         //判断索引是否存在
-        var_dump($es->exists_index());
+//        var_dump($es->exists_index());
 
         //获取索引
-        var_dump($es->get_index());
+//        var_dump($es->get_index());
 
         //添加文档
-        for ($id = 1; $id <= 1; $id++) {
+        for ($id = 1; $id <= 10; $id++) {
             var_dump($es->add_doc([
                 'id' => $id,
                 'username' => uniqid(),
@@ -213,21 +211,21 @@ class Test extends TestCase
 
         //删除文档
         $id = 1;
-        var_dump($es->delete_doc($id));
+//        var_dump($es->delete_doc($id));
 
         //更新文档
         $id = 2;
-        var_dump($es->update_doc($id, [
-            'content' => 'update content after'
-        ]));
+//        var_dump($es->update_doc($id, [
+//            'content' => 'update content after'
+//        ]));
 
         //判断文档是否存在
         $id = 1;
-        var_dump($es->exists_doc($id));
+//        var_dump($es->exists_doc($id));
 
         //获取文档
         $id = 2;
-        var_dump($es->get_doc($id));
+//        var_dump($es->get_doc($id));
 
         //搜索文档
 

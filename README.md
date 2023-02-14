@@ -5,6 +5,12 @@
  - **[elasticsearch：8.2.0](https://www.elastic.co/downloads/past-releases/elasticsearch-8-2-0)**
  - **[kibana：8.2.0](https://codeload.github.com/elastic/kibana/zip/refs/tags/v8.2.0)**
 
+### 版本新增
+  - V1.0.6 新增
+    - 修复 新增文档(`add_doc`) 连贯问题
+    - 新增 `where` 闭包函数，可对where追加自定义属性
+    - 开放 `getParam` 函数为公有, `getParam` 用于存储所有的 `elasticsearch` 查询信息
+
 ### 使用
 ~~~ 
 //地址
