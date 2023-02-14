@@ -70,7 +70,7 @@ class ElasticsearchHandler
      * MyElasticsearch constructor.
      * @throws Exception
      */
-    public function __construct($host = "127.0.0.1:9201", $retries = 10)
+    public function __construct($host = "127.0.0.1:9200", $retries = 10)
     {
         $this->setHost($host);
         $this->setRetries($retries);
