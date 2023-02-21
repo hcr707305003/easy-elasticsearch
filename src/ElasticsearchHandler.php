@@ -88,8 +88,8 @@ class ElasticsearchHandler
     public function create_index(array $body = [])
     {
         //初始化索引参数
-        $this->setParam($this->getIndex(), 'index', $this->param)
-            ->setParam($this->getType(), 'type', $this->param)
+        $this->setParam($this->getIndex(), 'index', $this->param, true)
+            ->setParam($this->getType(), 'type', $this->param, true)
             ->setParam($this->getSetting(), 'body.settings', $this->param)
             ->setParam(['enabled' => true], 'body.mappings._source', $this->param)
             ->setParam($this->setProperties($body)->getProperties(), 'body.mappings.properties', $this->param);
@@ -107,7 +107,7 @@ class ElasticsearchHandler
      */
     public function exists_index()
     {
-        $this->setParam($this->getIndex(),'index', $this->param);
+        $this->setParam($this->getIndex(),'index', $this->param, true);
         try {
             return $this->client->indices()->exists($this->getParam('index'))->asBool();
         } catch (Exception $e) {
@@ -121,7 +121,7 @@ class ElasticsearchHandler
      */
     public function get_index()
     {
-        $this->setParam($this->getIndex(),'index', $this->param);
+        $this->setParam($this->getIndex(),'index', $this->param, true);
         try {
             return $this->client->indices()->getMapping($this->getParam('index'))->asArray();
         } catch (Exception $e) {
@@ -135,8 +135,8 @@ class ElasticsearchHandler
      */
     public function delete_index()
     {
-        $this->setParam($this->getIndex(),'index', $this->param)
-            ->setParam($this->getType(),'type', $this->param);
+        $this->setParam($this->getIndex(),'index', $this->param, true)
+            ->setParam($this->getType(),'type', $this->param, true);
         try {
             return $this->client->indices()->delete($this->getParam(['index', 'type']))->asBool();
         } catch (Exception $e) {
@@ -153,8 +153,8 @@ class ElasticsearchHandler
      */
     public function add_doc($doc, $id = null)
     {
-        $this->setParam($this->getIndex(),'index',$this->param)
-            ->setParam($this->getType(),'type',$this->param)
+        $this->setParam($this->getIndex(),'index',$this->param, true)
+            ->setParam($this->getType(),'type',$this->param, true)
             ->setParam($id,'id',$this->param, true)
             ->setSaveData($doc);
         $param = $this->getParam(['index', 'type', 'id']);
@@ -173,9 +173,9 @@ class ElasticsearchHandler
      * @example $object->delete_doc($id);//bool
      */
     public function delete_doc($id) {
-        $this->setParam($this->getIndex(),'index',$this->param)
-            ->setParam($this->getType(),'type',$this->param)
-            ->setParam($id,'id',$this->param);
+        $this->setParam($this->getIndex(),'index',$this->param, true)
+            ->setParam($this->getType(),'type',$this->param, true)
+            ->setParam($id,'id',$this->param, true);
         try {
             return $this->client->delete($this->getParam(['index', 'type', 'id']))->asBool();
         } catch (Exception $e) {
@@ -190,9 +190,9 @@ class ElasticsearchHandler
      * @example $object->exists_doc($id);//bool
      */
     public function exists_doc($id) {
-        $this->setParam($this->getIndex(),'index',$this->param)
-            ->setParam($this->getType(),'type',$this->param)
-            ->setParam($id,'id', $this->param);
+        $this->setParam($this->getIndex(),'index',$this->param, true)
+            ->setParam($this->getType(),'type',$this->param, true)
+            ->setParam($id,'id', $this->param, true);
         try {
             return $this->client->exists($this->getParam(['index', 'type', 'id']))->asBool();
         } catch (Exception $e) {
@@ -206,9 +206,9 @@ class ElasticsearchHandler
      * @return array|string
      */
     public function get_doc($id) {
-        $this->setParam($this->getIndex(),'index',$this->param)
-            ->setParam($this->getType(),'type',$this->param)
-            ->setParam($id,'id', $this->param);
+        $this->setParam($this->getIndex(),'index',$this->param, true)
+            ->setParam($this->getType(),'type',$this->param, true)
+            ->setParam($id,'id', $this->param, true);
         try {
             return $this->client->get($this->getParam(['index', 'type', 'id']))->asArray();
         } catch (Exception $e) {
@@ -224,9 +224,9 @@ class ElasticsearchHandler
      */
     public function update_doc($id, array $body = []) {
         // 可以灵活添加新字段,最好不要乱添加
-        $this->setParam($this->getIndex(),'index',$this->param)
-            ->setParam($this->getType(),'type',$this->param)
-            ->setParam($id,'id',$this->param)
+        $this->setParam($this->getIndex(),'index',$this->param, true)
+            ->setParam($this->getType(),'type',$this->param, true)
+            ->setParam($id,'id',$this->param, true)
             ->setParam($body,'body.doc',$this->param, true);
         try {
             return $this->client->update($this->getParam())->asBool();
@@ -240,10 +240,10 @@ class ElasticsearchHandler
      * @return array|string
      */
     public function search_doc() {
-        $this->setParam($this->getIndex())
-            ->setParam($this->getType(),'type')
-            ->setParam($this->getLimit(),'size')
-            ->setParam(($this->getPage() - 1) * $this->getLimit(), 'from')
+        $this->setParam($this->getIndex(),'index',$this->param, true)
+            ->setParam($this->getType(),'type',$this->param, true)
+            ->setParam($this->getLimit(),'size',$this->param, true)
+            ->setParam(($this->getPage() - 1) * $this->getLimit(), 'from',$this->param, true)
             ->setParam([], 'body', $this->param, true);
         //where condition jointing
         if($this->getWhereData()) {
