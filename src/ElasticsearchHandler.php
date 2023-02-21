@@ -662,16 +662,24 @@ class ElasticsearchHandler
      * @param array|string $highLight
      * @param string[] $pre_tags
      * @param string[] $post_tags
+     * @param null|int|boolean $size
      * @return self
      */
-    public function setHighLight($highLight = [], array $pre_tags = ["<span style='color: red;'>"], array $post_tags = ["</span>"]): self
+    public function setHighLight($highLight = [], array $pre_tags = ["<span style='color: red;'>"], array $post_tags = ["</span>"], $size = null): self
     {
         if($highLight) {
             $this->highLight['pre_tags'] = $pre_tags;
             $this->highLight['post_tags'] = $post_tags;
         }
-        foreach (is_string($highLight)? explode(',', $highLight): $highLight as $field) {
-            $this->highLight['fields'][$field] = new stdClass();
+        foreach (is_string($highLight)? explode(',', $highLight): $highLight as $key => $field) {
+            if (is_string($key)) {
+                $this->highLight['fields'][$key] = new stdClass();
+                if(is_array($field)) foreach ($field as $k => $v) $this->highLight[$k] = $v;
+            } else {
+                $this->highLight['fields'][$field] = new stdClass();
+            }
+            if($size !== null)
+                $this->highLight['number_of_fragments'] = $size;
         }
         return $this;
     }

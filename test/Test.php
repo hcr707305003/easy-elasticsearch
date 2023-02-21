@@ -10,7 +10,7 @@ class Test extends TestCase
 
     public function handler(): \Shiroi\EasyElasticsearch\ElasticsearchHandler
     {
-        $handler = new \Shiroi\EasyElasticsearch\ElasticsearchHandler();
+        $handler = new \Shiroi\EasyElasticsearch\ElasticsearchHandler('127.0.0.1:9201');
         return $handler
             //设置索引
             ->setIndex(self::$index_name)
@@ -141,8 +141,10 @@ class Test extends TestCase
             ->order(['id' => 'desc'])
             ->setHighLight([
                 'password',
-                'content'
-            ])
+                'content' => [
+                    'number_of_fragments' => 10
+                ]
+            ], ["<span style='color: red;'>"], ["</span>"], 20)
             ->search_doc());
     }
 
