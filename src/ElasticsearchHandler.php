@@ -39,6 +39,8 @@ class ElasticsearchHandler
 
     private array $order = [];
 
+    private array $field = [];
+
     private array $highLight = [];
 
     //索引属性
@@ -249,6 +251,10 @@ class ElasticsearchHandler
         if($this->getWhereData()) {
             $this->setParam($this->getWhereData(), 'body.query');
         }
+        //field condition jointing
+        if($this->getField()) {
+            $this->setParam($this->getField(), 'body._source');
+        }
         //order condition jointing
         $this->setParam($this->getOrder(), 'body.sort');
         //set highlight
@@ -261,6 +267,15 @@ class ElasticsearchHandler
         } catch (Exception $e) {
             return $e->getMessage();
         }
+    }
+
+    public function field($field = []):self {
+        if(is_string($field)) {
+            $this->field = explode(',', $field);
+        } else {
+            $this->field = $field;
+        }
+        return $this;
     }
 
     public function where($field, $op = null, $condition = null, $func = null): self {
@@ -628,6 +643,14 @@ class ElasticsearchHandler
     private function setWhereData(array $whereData): void
     {
         $this->whereData = $whereData;
+    }
+
+    /**
+     * @return array
+     */
+    public function getField(): array
+    {
+        return $this->field;
     }
 
     /**
