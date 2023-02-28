@@ -124,6 +124,9 @@ class Test extends TestCase
             //多条件查询
             ->where('id','not between', [5,10])
             ->where([
+                ['id', 'not between', [5,10]]
+            ])
+            ->where([
                 'password' => ['>=', 500000, function($obj) {
                     $obj->boost = 4;
                 }],
