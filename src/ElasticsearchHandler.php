@@ -273,7 +273,11 @@ class ElasticsearchHandler
                         $val = [$val];break;
                     }
                     foreach ($val as $v) {
-                        call_user_func_array([self::class, 'buildWhere'], array_merge([$key], $v));
+                        if(is_int($key)) {
+                            call_user_func_array([self::class, 'buildWhere'], $v);
+                        } else {
+                            call_user_func_array([self::class, 'buildWhere'], array_merge([$key], $v));
+                        }
                     }
                 }
             }
