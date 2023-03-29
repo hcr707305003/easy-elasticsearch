@@ -386,7 +386,11 @@ class ElasticsearchHandler
                 }
                 break;
             case '=':
-                $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
+                if(count($multi_field = explode('|', $field)) > 1) {
+                    $this->andWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                } else {
+                    $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
+                }
                 break;
             case 'gt':
             case '>':
@@ -450,7 +454,11 @@ class ElasticsearchHandler
             case '!=':
             case 'not like':
             case 'not':
-                $this->notWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
+                if(count($multi_field = explode('|', $field)) > 1) {
+                    $this->notWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                } else {
+                    $this->notWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
+                }
                 break;
             case 'not in':
                 if(is_string($condition)) $condition = explode(',',$condition);
@@ -467,10 +475,18 @@ class ElasticsearchHandler
             case 'or':
             case '||':
             case 'or like':
-                $this->orWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
+                if(count($multi_field = explode('|', $field)) > 1) {
+                    $this->orWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                } else {
+                    $this->orWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
+                }
                 break;
             default:
-                $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
+                if(count($multi_field = explode('|', $field)) > 1) {
+                    $this->andWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                } else {
+                    $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
+                }
         }
     }
 

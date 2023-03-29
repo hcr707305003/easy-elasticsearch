@@ -368,4 +368,13 @@ class Test extends TestCase
             ])
             ->search_doc());
     }
+
+    /**
+     * 搜索文档(多字段查询)
+     */
+    public function testSearchDoc_4() {
+        var_export($this->handler()
+            ->where('content|password', '=', 'aaaaa')
+            ->search_doc());
+    }
 }
