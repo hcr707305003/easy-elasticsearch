@@ -374,7 +374,14 @@ class Test extends TestCase
      */
     public function testSearchDoc_4() {
         var_export($this->handler()
-            ->where('content|password', '=', 'bbb')
+            ->where([
+                [
+                    'status', '=', 2
+                ],
+                [
+                    "title|describe", 'like', '噶啥刚打那个'
+                ]
+            ])
             ->search_doc());
     }
 }

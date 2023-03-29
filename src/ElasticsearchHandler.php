@@ -448,7 +448,11 @@ class ElasticsearchHandler
             case 'and':
             case 'like':
             case '&&':
-                $this->andWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
+                if(count($multi_field = explode('|', $field)) > 1) {
+                    $this->andWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                } else {
+                    $this->andWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
+                }
                 break;
             case '=!':
             case '!=':
