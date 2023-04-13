@@ -319,6 +319,15 @@ class ElasticsearchHandler
         return $this;
     }
 
+    public function flushWhere(): self
+    {
+        $this->andWhere = [];
+        $this->notWhere = [];
+        $this->orWhere = [];
+        $this->whereData = [];
+        return $this;
+    }
+
     /**
      * @return string
      */

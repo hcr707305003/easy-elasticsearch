@@ -384,4 +384,24 @@ class Test extends TestCase
             ])
             ->search_doc());
     }
+
+    /**
+     * 搜索文档(清空之前的where条件)
+     */
+    public function testSearchDoc_5() {
+        var_export($this->handler()
+            ->where([
+                ['id', 'not between', [5,10]]
+            ])
+            ->flushWhere()
+            ->where([
+                [
+                    'status', '=', 2
+                ],
+                [
+                    "title|describe", 'like', '噶啥刚打那个'
+                ]
+            ])
+            ->search_doc());
+    }
 }
