@@ -451,7 +451,7 @@ class ElasticsearchHandler
                 break;
             case 'in':
                 $this->andWhere[]['terms'] = [$field => array_merge(
-                    ['value' => is_array($condition)? $condition: explode(',',$condition)], $fields
+                    is_array($condition)? $condition: explode(',',$condition), $fields
                 )];
                 break;
             case 'and':

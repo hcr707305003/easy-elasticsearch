@@ -247,4 +247,32 @@ var_export($es
         'content'
     ])
     ->search_doc());
+    
+//多字段搜索
+var_export($es
+    ->where([
+        [
+            'status', '=', 2
+        ],
+        [
+            "title|describe", 'like', '噶啥刚打那个'
+        ]
+    ])
+    ->search_doc());
+    
+//刷新where条件
+var_export($es
+    ->where([
+        ['id', 'not between', [5,10]]
+    ])
+    ->flushWhere() //刷新后（前面的where条件则不存在）
+    ->where([
+        [
+            'status', '=', 2
+        ],
+        [
+            "title|describe", 'like', '噶啥刚打那个'
+        ]
+    ])
+    ->search_doc());
 ~~~
