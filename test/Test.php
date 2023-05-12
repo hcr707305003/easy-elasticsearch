@@ -141,7 +141,6 @@ class Test extends TestCase
 //                    ['<', 8]
 //                ]
             ])
-
             ->order(['id' => 'desc'])
             ->setHighLight([
                 'password',
