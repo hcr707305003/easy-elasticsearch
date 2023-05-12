@@ -247,7 +247,7 @@ class ElasticsearchHandler
         $this->setParam($this->getIndex(),'index',$this->param, true)
             ->setParam($this->getType(),'type',$this->param, true)
             ->setParam($this->getLimit(),'size',$this->param, true)
-            ->setParam((($this->getPage() - 1) * $this->getLimit()) - $this->skipLimit, 'from',$this->param, true)
+            ->setParam((($this->getPage() - 1) * $this->getLimit()) + $this->skipLimit, 'from',$this->param, true)
             ->setParam([], 'body', $this->param, true);
         //where condition jointing
         if($this->getWhereData()) {
