@@ -31,6 +31,8 @@ class ElasticsearchHandler
 
     private int $limit = 20;
 
+    private int $skipLimit = 0;
+
     private array $andWhere = [];
 
     private array $notWhere = [];
@@ -245,7 +247,7 @@ class ElasticsearchHandler
         $this->setParam($this->getIndex(),'index',$this->param, true)
             ->setParam($this->getType(),'type',$this->param, true)
             ->setParam($this->getLimit(),'size',$this->param, true)
-            ->setParam(($this->getPage() - 1) * $this->getLimit(), 'from',$this->param, true)
+            ->setParam((($this->getPage() - 1) * $this->getLimit()) - $this->skipLimit, 'from',$this->param, true)
             ->setParam([], 'body', $this->param, true);
         //where condition jointing
         if($this->getWhereData()) {
@@ -654,6 +656,16 @@ class ElasticsearchHandler
     public function setLimit(int $limit): self
     {
         $this->limit = $limit;
+        return $this;
+    }
+
+    /**
+     * @param int $skipLimit
+     * @return self
+     */
+    public function skipLimit(int $skipLimit = 0): self
+    {
+        $this->skipLimit = $skipLimit;
         return $this;
     }
 

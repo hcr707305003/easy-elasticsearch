@@ -111,6 +111,7 @@ class Test extends TestCase
      */
     public function testSearchDoc_1() {
         var_export($this->handler()
+            ->skipLimit(2)
             ->setPage(1)
             ->setLimit(10)
             //精确查询
