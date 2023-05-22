@@ -69,6 +69,11 @@ class ElasticsearchHandler
     //保存条件
     private array $saveData = [];
 
+    //字段属性
+    private array $fieldAttribute = [
+        'type'
+    ];
+
     /**
      * 构造函数
      * MyElasticsearch constructor.
@@ -263,7 +268,7 @@ class ElasticsearchHandler
         if($this->getHighLight()) {
             $this->setParam($this->getHighLight(), 'body.highlight');
         }
-//        var_export($this->getParam(['index', 'type', 'size', 'from', 'body']));die();
+        var_export(json_encode($this->getParam()));die();
         try {
             return $this->client->search($this->getParam(['index', 'type', 'size', 'from', 'body']))->asArray();
         } catch (Exception $e) {
@@ -378,6 +383,7 @@ class ElasticsearchHandler
         $param = func_get_args();
         $obj = end($param);
         $fields = [];
+        $attributes = [];
         if(is_object($obj)) {
             //获取对象
             $obj($queryProperty = new QueryProperty());
@@ -385,6 +391,10 @@ class ElasticsearchHandler
             $fields = array_filter(get_object_vars($queryProperty));
             //忽略对象参数
             array_pop($param);
+            //属性追加
+            foreach ($fields as $attribute => $value) {
+                if(in_array($attribute, $this->fieldAttribute)) $attributes[$attribute] = $value;
+            }
         }
         if(count($param) == 2) $condition = $op;
         switch ($op) {
@@ -398,7 +408,7 @@ class ElasticsearchHandler
                 break;
             case '=':
                 if(count($multi_field = explode('|', $field)) > 1) {
-                    $this->andWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                    $this->andWhere[]['multi_match'] = array_merge(['query' => $condition, 'fields' => $multi_field], $attributes);
                 } else {
                     $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
                 }
@@ -460,7 +470,7 @@ class ElasticsearchHandler
             case 'like':
             case '&&':
                 if(count($multi_field = explode('|', $field)) > 1) {
-                    $this->andWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                    $this->andWhere[]['multi_match'] = array_merge(['query' => $condition, 'fields' => $multi_field], $attributes);
                 } else {
                     $this->andWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
                 }
@@ -470,7 +480,7 @@ class ElasticsearchHandler
             case 'not like':
             case 'not':
                 if(count($multi_field = explode('|', $field)) > 1) {
-                    $this->notWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                    $this->notWhere[]['multi_match'] = array_merge(['query' => $condition, 'fields' => $multi_field], $attributes);
                 } else {
                     $this->notWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
                 }
@@ -491,14 +501,14 @@ class ElasticsearchHandler
             case '||':
             case 'or like':
                 if(count($multi_field = explode('|', $field)) > 1) {
-                    $this->orWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                    $this->orWhere[]['multi_match'] = array_merge(['query' => $condition, 'fields' => $multi_field], $attributes);
                 } else {
                     $this->orWhere[]['match'] = [$field => array_merge(['query' => $condition], $fields)];
                 }
                 break;
             default:
                 if(count($multi_field = explode('|', $field)) > 1) {
-                    $this->andWhere[]['multi_match'] = ['query' => $condition, 'fields' => $multi_field];
+                    $this->andWhere[]['multi_match'] = array_merge(['query' => $condition, 'fields' => $multi_field], $attributes);
                 } else {
                     $this->andWhere[]['term'] = [$field => array_merge(['value' => $condition], $fields)];
                 }

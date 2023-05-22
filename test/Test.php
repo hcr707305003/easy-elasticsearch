@@ -405,4 +405,19 @@ class Test extends TestCase
             ])
             ->search_doc());
     }
+
+    /**
+     * 搜索文档(测试字段属性)
+     */
+    public function testSearchDoc_6() {
+        var_export($this->handler()
+            ->where([
+                [
+                    "title|describe", 'or', '噶啥刚打那个', function($query) {
+                        $query->type = "phrase";
+                    }
+                ]
+            ])
+            ->search_doc());
+    }
 }
