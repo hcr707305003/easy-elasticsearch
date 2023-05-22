@@ -268,7 +268,7 @@ class ElasticsearchHandler
         if($this->getHighLight()) {
             $this->setParam($this->getHighLight(), 'body.highlight');
         }
-        var_export(json_encode($this->getParam()));die();
+//        var_export(json_encode($this->getParam()));die();
         try {
             return $this->client->search($this->getParam(['index', 'type', 'size', 'from', 'body']))->asArray();
         } catch (Exception $e) {
