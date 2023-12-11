@@ -248,7 +248,7 @@ class ElasticsearchHandler
      * 搜索文档 (分页，排序，权重，过滤)
      * @return array|string
      */
-    public function search_doc() {
+    public function search_doc($event = null) {
         $this->setParam($this->getIndex(),'index',$this->param, true)
             ->setParam($this->getType(),'type',$this->param, true)
             ->setParam($this->getLimit(),'size',$this->param, true)
@@ -268,9 +268,15 @@ class ElasticsearchHandler
         if($this->getHighLight()) {
             $this->setParam($this->getHighLight(), 'body.highlight');
         }
-//        var_export(json_encode($this->getParam()));die();
+
+        //body struct
+        $body = $this->getParam(['index', 'type', 'size', 'from', 'body']);
+        if (is_callable($event)) {
+            $body = $event($body,$this);
+        }
+//        var_export(json_encode($body));die();
         try {
-            return $this->client->search($this->getParam(['index', 'type', 'size', 'from', 'body']))->asArray();
+            return $this->client->search($body)->asArray();
         } catch (Exception $e) {
             return $e->getMessage();
         }
