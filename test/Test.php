@@ -419,7 +419,7 @@ class Test extends TestCase
                 ]
             ])
             ->search_doc(function ($body) { //打印请求体
-//                var_export($body);die;
+                var_export($body);die;
                 return $body;
             }));
     }
