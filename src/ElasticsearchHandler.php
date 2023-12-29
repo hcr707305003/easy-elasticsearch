@@ -92,9 +92,10 @@ class ElasticsearchHandler
     /**
      * 创建索引
      * @param array $body
+     * @param null $callback
      * @return bool|string
      */
-    public function create_index(array $body = [])
+    public function create_index(array $body = [], $callback = null)
     {
         //初始化索引参数
         $this->setParam($this->getIndex(), 'index', $this->param, true)
@@ -102,8 +103,14 @@ class ElasticsearchHandler
             ->setParam($this->getSetting(), 'body.settings', $this->param)
             ->setParam(['enabled' => true], 'body.mappings._source', $this->param)
             ->setParam($this->setProperties($body)->getProperties(), 'body.mappings.properties', $this->param);
+
+        //接收所有参数
+        $body = $this->getParam();
+        if (is_callable($callback)) {
+            $body = $callback($body,$this);
+        }
         try {
-            $getIndex = $this->client->indices()->create($this->getParam())->asBool();
+            $getIndex = $this->client->indices()->create($body)->asBool();
         } catch (Exception $e) {
             $getIndex = $this->exists_index();
         }
@@ -248,7 +255,7 @@ class ElasticsearchHandler
      * 搜索文档 (分页，排序，权重，过滤)
      * @return array|string
      */
-    public function search_doc($event = null) {
+    public function search_doc($callback = null) {
         $this->setParam($this->getIndex(),'index',$this->param, true)
             ->setParam($this->getType(),'type',$this->param, true)
             ->setParam($this->getLimit(),'size',$this->param, true)
@@ -271,8 +278,8 @@ class ElasticsearchHandler
 
         //body struct
         $body = $this->getParam(['index', 'type', 'size', 'from', 'body']);
-        if (is_callable($event)) {
-            $body = $event($body,$this);
+        if (is_callable($callback)) {
+            $body = $callback($body,$this);
         }
 //        var_export(json_encode($body));die();
         try {

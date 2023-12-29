@@ -423,4 +423,50 @@ class Test extends TestCase
                 return $body;
             }));
     }
+
+    /**
+     * 创建索引自定义配置属性追加
+     * @return void
+     */
+    public function testSearchDoc_7() {
+        $table = [
+            'id' => 'int',
+            'username' => 'text',
+            'password' => 'text',
+            'content' => 'text',
+            'create_time' => 'int',
+            'update_time' => 'int',
+        ];
+
+        var_dump($this->handler()->create_index($table, function ($body) {
+            $body['body']['settings']['index'] = [
+                'routing' => [
+                    'allocation' => [
+                        'include' => [
+                            '_tier_preference' => 'data_content'
+                        ]
+                    ]
+                ],
+                'number_of_shards' => '1',
+                'analysis' => [
+                    'analyzer' => [
+                        'my_analyzer' => [
+                            'type' => 'custom',
+                            'tokenizer' => 'standard'
+                        ]
+                    ],
+                    'tokenizer' => [
+                        'my_tokenizer' => [
+                            'dict' => 'http://elasticsearchconfig.mhgct.com/my_except.dic',
+                            'updateable' => 'true',
+                            'type' => 'ik_max_word',
+                            'use_smart' => 'true'
+                        ]
+                    ]
+                ],
+                'number_of_replicas' => '1'
+            ];
+            return $body;
+        }));
+    }
 }
