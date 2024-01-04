@@ -640,7 +640,17 @@ class ElasticsearchHandler
     {
         foreach ($properties as $column => $info) {
             foreach ($this->columnType as $types => $content) {
-                if(in_array($info,explode('|',$types))) $this->properties[$column] = $content;
+                $infoData = [];
+                if(is_array($info)) {
+                    $infoType = $info['type'] ?? 'text';
+                    unset($info['type']);
+                    $infoData = $info;
+                } else {
+                    $infoType = $info;
+                }
+                if(in_array($infoType,explode('|',$types))) {
+                    $this->properties[$column] = $infoData ? array_merge(array_intersect_key($content, array_flip(['type'])), $infoData): $content;
+                }
             }
         }
         return $this;
@@ -739,6 +749,23 @@ class ElasticsearchHandler
     public function setSaveData(array $saveData): void
     {
         $this->saveData = $saveData;
+    }
+
+    /**
+     * @return array|array[]
+     */
+    public function getColumnType(): array
+    {
+        return $this->columnType;
+    }
+
+    /**
+     * @param array $columnType
+     * @return void
+     */
+    public function setColumnType(array $columnType): void
+    {
+        $this->columnType = $columnType;
     }
 
     /**

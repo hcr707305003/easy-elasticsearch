@@ -433,7 +433,10 @@ class Test extends TestCase
             'id' => 'int',
             'username' => 'text',
             'password' => 'text',
-            'content' => 'text',
+            'content' => [
+                'type' => 'text',
+                'analyzer' => 'my_analyzer'
+            ],
             'create_time' => 'int',
             'update_time' => 'int',
         ];
